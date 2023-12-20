@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html ng-app="githubApp">
+
+<head>
+  <title>Repository search results</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/controllers/main_controller.js"></script>
+  <script src="js/services/githubService.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body ng-controller="main_controller" style="background-color: #0D1117">
+  <header>
+    <div class="header">
+      <img class="icon" src="../app/assets/github_logo.png" alt="Icon"/>
+      <form class="search-form" ng-submit="searchRepositories()">
+        <input type="text" ng-model="searchQuery" placeholder="Search repositories" class="search-input">
+        <button type="submit" class="search-button"><i class="fa fa-search"></i></button>
+      </form>
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/139426?v=4" alt="Avatar"/>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="sidebar">
+        <div ng-show="sidebar" class="languages-container">
+          <hr>
+          <p class="text">Languages</p>
+          <div ng-repeat="(language, repos) in languageRepositories" style="display: block; margin-bottom: 5px;">
+            <div>
+              <span class="language-dot" ng-style="getLanguageColor(language)"></span>
+              <a href="#" ng-click="openLanguageRepos(language)" class="language-link">{{language}}<br><br></a>
+            </div>
+            <div ng-show="language === selectedLanguage">
+              <ul>
+                <li ng-repeat="repo in repos">
+                  <a ng-href="{{repo.html_url}}" target="_blank" class="language-link">{{repo.name}}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <hr>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div ng-repeat="repo in repositories" class="repo-container">
+          <h3>
+            <img class="repo-image" ng-src="{{repo.owner.avatar_url}}" alt="Avatar" width="20" height="20">
+            <a ng-href="{{repo.html_url}}" target="_blank" class="repo-link">{{repo.full_name}}</a>
+          </h3>
+          <p class="text-description">{{repo.description}}</p>
+          <div class="topics">
+            <a ng-href="https://github.com/topics/{{topic}}" ng-repeat="topic in repo.topics" target="_blank">{{topic}}</a>
+          </div>
+          <div class="row">
+            <p style="display: inline-block;" class="text">
+              <span ng-if="repo.language" class="language-dot" ng-style="getLanguageColor(repo.language)"></span>
+              {{repo.language}}
+            </p>
+            <span ng-if="repo.language" class="separator-dot"></span>
+            <a ng-href="https://github.com/{{repo.owner.login}}/{{repo.name}}/stargazers" target="_blank" class="stars-link" style="display: inline-block;">
+              <i class="fas fa-star"></i>{{formatStargazersCount(repo.stargazers_count)}}
+            </a>
+            <span class="separator-dot"></span>
+            <p style="display: inline-block;" class="text">
+              {{formatLastUpdatedDate(repo.updated_at)}}
+            </p>
+          </div>
+        </div>
+        <div ng-show="sidebar" class="pagination">
+          <button type="button" class="button-first-last" ng-disabled="currentPage === 1" ng-click="previousPage()">Previous</button>
+          <span ng-if="currentPage > 4" class="text-pagination">...</span>
+          <span ng-repeat="page in getPages()" ng-class="{ active: currentPage === page }" class="button-middle">
+            <a href="#" ng-click="goToPage(page)" class="text-pagination" ng-init="checkActive(page)" 
+               ng-style="currentPage === page ? {'font-weight': 'bold', 'color': '#1C6AF7'} : {'font-weight': 'normal', 'color': '#FFF'}">
+                {{page}}
+            </a>
+          </span>
+          <span ng-if="currentPage < totalPages - 3" style="margin-left: 18px; margin-right: 18px;" class="text-pagination">...</span>
+          <button type="button" class="button-first-last" ng-disabled="currentPage === totalPages" ng-click="nextPage()">Next</button>
+        </div>      
+      </div>
+    </div>
+  </main>
+  <footer class="footer">
+    <p>&copy; Lara Scaranello - {{anoAtual}}</p>
+  </footer>
+</body>
+
+</html>
